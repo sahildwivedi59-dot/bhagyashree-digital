@@ -4,7 +4,7 @@ import { createRoot } from "react-dom/client";
 import { Globe, Workflow, Megaphone, Bot, Users, Briefcase, Phone, Mail, MapPin, MessageCircle, Star, CheckCircle, Send } from "lucide-react";
 import "./style.css";
 
-const API="http://localhost:5000";
+const API = "https://bhagyashree-digital.onrender.com";
 const baseWa = "https://wa.me/917581841039";
 function waMsg(text){ return `${baseWa}?text=${encodeURIComponent(text)}`; }
 
