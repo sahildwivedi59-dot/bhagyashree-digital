@@ -6,7 +6,12 @@ const { createClient } = require("@supabase/supabase-js");
 
 const app = express();
 
-app.use(cors());
+app.use(cors({
+  origin: "*",
+  methods: ["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"]
+}));
+
 app.use(express.json());
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
@@ -20,10 +25,12 @@ if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 app.get("/", (req, res) => {
-  res.json({ message: "Bhagyashree Digital Backend Running 🚀" });
+  res.json({
+    success: true,
+    message: "Bhagyashree Digital Backend Running 🚀"
+  });
 });
 
-// Get all leads
 app.get("/api/leads", async (req, res) => {
   try {
     const { data, error } = await supabase
@@ -35,16 +42,16 @@ app.get("/api/leads", async (req, res) => {
       return res.status(400).json({ success: false, message: error.message });
     }
 
-    const leads = data.map((lead) => ({
+    const leads = (data || []).map((lead) => ({
       id: lead.id,
-      name: lead.name,
-      phone: lead.phone,
-      email: lead.email,
-      type: lead.business_type,
-      service: lead.service,
-      message: lead.message,
+      name: lead.name || "",
+      phone: lead.phone || "",
+      email: lead.email || "",
+      type: lead.business_type || "",
+      service: lead.service || "",
+      message: lead.message || "",
       status: lead.status || "New",
-      createdAt: lead.created_at,
+      createdAt: lead.created_at
     }));
 
     res.json({ success: true, leads });
@@ -53,7 +60,6 @@ app.get("/api/leads", async (req, res) => {
   }
 });
 
-// Add new lead
 app.post("/api/leads", async (req, res) => {
   try {
     const { name, phone, email, type, business_type, service, message } = req.body;
@@ -61,7 +67,7 @@ app.post("/api/leads", async (req, res) => {
     if (!name || !phone) {
       return res.status(400).json({
         success: false,
-        message: "Name and phone are required",
+        message: "Name and phone are required"
       });
     }
 
@@ -75,8 +81,8 @@ app.post("/api/leads", async (req, res) => {
           business_type: business_type || type || null,
           service: service || null,
           message: message || null,
-          status: "New",
-        },
+          status: "New"
+        }
       ])
       .select();
 
@@ -86,15 +92,14 @@ app.post("/api/leads", async (req, res) => {
 
     res.json({
       success: true,
-      message: "Lead Saved Successfully",
-      data,
+      message: "Lead saved successfully",
+      data
     });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
 });
 
-// Update lead status
 app.patch("/api/leads/:id", async (req, res) => {
   try {
     const { id } = req.params;
@@ -116,18 +121,23 @@ app.patch("/api/leads/:id", async (req, res) => {
   }
 });
 
-// Delete lead
 app.delete("/api/leads/:id", async (req, res) => {
   try {
     const { id } = req.params;
 
-    const { error } = await supabase.from("leads").delete().eq("id", id);
+    const { error } = await supabase
+      .from("leads")
+      .delete()
+      .eq("id", id);
 
     if (error) {
       return res.status(400).json({ success: false, message: error.message });
     }
 
-    res.json({ success: true, message: "Lead deleted successfully" });
+    res.json({
+      success: true,
+      message: "Lead deleted successfully"
+    });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
