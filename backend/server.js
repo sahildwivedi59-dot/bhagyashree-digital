@@ -1,8 +1,9 @@
-require("dotenv").config({ path: __dirname + "/.env" });
+import dotenv from "dotenv";
+import express from "express";
+import cors from "cors";
+import { createClient } from "@supabase/supabase-js";
 
-const express = require("express");
-const cors = require("cors");
-const { createClient } = require("@supabase/supabase-js");
+dotenv.config();
 
 const app = express();
 
@@ -18,7 +19,7 @@ const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY;
 
 if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-  console.error("Missing SUPABASE_URL or SUPABASE_ANON_KEY in backend/.env");
+  console.error("Missing SUPABASE_URL or SUPABASE_ANON_KEY");
   process.exit(1);
 }
 
@@ -39,7 +40,10 @@ app.get("/api/leads", async (req, res) => {
       .order("created_at", { ascending: false });
 
     if (error) {
-      return res.status(400).json({ success: false, message: error.message });
+      return res.status(400).json({
+        success: false,
+        message: error.message
+      });
     }
 
     const leads = (data || []).map((lead) => ({
@@ -54,9 +58,15 @@ app.get("/api/leads", async (req, res) => {
       createdAt: lead.created_at
     }));
 
-    res.json({ success: true, leads });
+    res.json({
+      success: true,
+      leads
+    });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({
+      success: false,
+      message: err.message
+    });
   }
 });
 
@@ -87,7 +97,10 @@ app.post("/api/leads", async (req, res) => {
       .select();
 
     if (error) {
-      return res.status(400).json({ success: false, message: error.message });
+      return res.status(400).json({
+        success: false,
+        message: error.message
+      });
     }
 
     res.json({
@@ -96,7 +109,10 @@ app.post("/api/leads", async (req, res) => {
       data
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({
+      success: false,
+      message: err.message
+    });
   }
 });
 
@@ -112,12 +128,21 @@ app.patch("/api/leads/:id", async (req, res) => {
       .select();
 
     if (error) {
-      return res.status(400).json({ success: false, message: error.message });
+      return res.status(400).json({
+        success: false,
+        message: error.message
+      });
     }
 
-    res.json({ success: true, data });
+    res.json({
+      success: true,
+      data
+    });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({
+      success: false,
+      message: err.message
+    });
   }
 });
 
@@ -131,7 +156,10 @@ app.delete("/api/leads/:id", async (req, res) => {
       .eq("id", id);
 
     if (error) {
-      return res.status(400).json({ success: false, message: error.message });
+      return res.status(400).json({
+        success: false,
+        message: error.message
+      });
     }
 
     res.json({
@@ -139,7 +167,10 @@ app.delete("/api/leads/:id", async (req, res) => {
       message: "Lead deleted successfully"
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({
+      success: false,
+      message: err.message
+    });
   }
 });
 
