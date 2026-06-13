@@ -1,60 +1,72 @@
+require("dotenv").config({ path: __dirname + "/.env" });
 
-const express=require("express");
-const cors=require("cors");
-const fs=require("fs");
-const path=require("path");
+const express = require("express");
+const cors = require("cors");
+const { createClient } = require("@supabase/supabase-js");
 
-const app=express();
+const app = express();
+
 app.use(cors());
 app.use(express.json());
 
-const file=path.join(__dirname,"data","leads.json");
+const SUPABASE_URL = process.env.SUPABASE_URL;
+const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY;
 
-function read(){
-  if(!fs.existsSync(file)) return [];
-  return JSON.parse(fs.readFileSync(file,"utf8"));
-}
-function write(data){
-  fs.writeFileSync(file,JSON.stringify(data,null,2));
+if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+  console.error("Missing SUPABASE_URL or SUPABASE_ANON_KEY in backend/.env");
+  process.exit(1);
 }
 
-app.get("/",(req,res)=>res.json({message:"Bhagyashree Digital Backend Running"}));
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-app.get("/api/leads",(req,res)=>{
-  res.json({leads:read()});
+app.get("/", (req, res) => {
+  res.json({ message: "Bhagyashree Digital Backend Running 🚀" });
 });
 
-app.post("/api/leads",(req,res)=>{
-  const {name,phone,type,service,message}=req.body;
-  if(!name || !phone) return res.status(400).json({message:"Name and phone required"});
-  const leads=read();
-  const lead={
-    id:Date.now().toString(),
-    name,
-    phone,
-    type:type||"",
-    service:service||"",
-    message:message||"",
-    status:"New",
-    createdAt:new Date().toISOString()
-  };
-  leads.unshift(lead);
-  write(leads);
-  res.status(201).json({message:"Lead saved",lead});
+app.post("/api/leads", async (req, res) => {
+  try {
+    const { name, phone, email, business_type, service, message } = req.body;
+
+    if (!name || !phone) {
+      return res.status(400).json({
+        success: false,
+        message: "Name and phone are required",
+      });
+    }
+
+    const { data, error } = await supabase.from("leads").insert([
+      {
+        name,
+        phone,
+        email: email || null,
+        business_type: business_type || null,
+        service: service || null,
+        message: message || null,
+      },
+    ]);
+
+    if (error) {
+      return res.status(400).json({
+        success: false,
+        message: error.message,
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "Lead Saved Successfully",
+      data,
+    });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: err.message,
+    });
+  }
 });
 
-app.patch("/api/leads/:id",(req,res)=>{
-  const leads=read();
-  const i=leads.findIndex(l=>l.id===req.params.id);
-  if(i<0) return res.status(404).json({message:"Lead not found"});
-  leads[i]={...leads[i],...req.body,updatedAt:new Date().toISOString()};
-  write(leads);
-  res.json({message:"Lead updated",lead:leads[i]});
-});
+const PORT = process.env.PORT || 5000;
 
-app.delete("/api/leads/:id",(req,res)=>{
-  write(read().filter(l=>l.id!==req.params.id));
-  res.json({message:"Lead deleted"});
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });
-
-app.listen(5000,()=>console.log("Backend running on http://localhost:5000"));

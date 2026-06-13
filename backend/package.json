@@ -4,7 +4,9 @@
     "start": "node server.js"
   },
   "dependencies": {
-    "express": "latest",
-    "cors": "latest"
+    "@supabase/supabase-js": "^2.108.1",
+    "cors": "latest",
+    "dotenv": "^17.4.2",
+    "express": "latest"
   }
 }
