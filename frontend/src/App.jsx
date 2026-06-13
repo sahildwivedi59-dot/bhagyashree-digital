@@ -82,9 +82,10 @@ function App(){
       const msg=`Hi Bhagyashree Digital, my name is ${lead.name}. Phone: ${lead.phone}. Business: ${lead.type}. Service: ${lead.service}. ${lead.message}`;
       window.open(waMsg(msg),"_blank");
       setLead({name:"",phone:"",type:"Doctors & Clinics",service:"Website + CRM",message:""});
-    }catch(err){
-      setStatus("❌ Backend not connected. Please run npm run dev.");
-    }
+    } catch (err) {
+  console.error("Lead submit error:", err);
+  setStatus("❌ " + err.message);
+}
   }
 
   return <main>
