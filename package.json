@@ -1,6 +1,17 @@
 {
+<<<<<<< HEAD
   "dependencies": {
     "@supabase/supabase-js": "^2.108.1",
     "dotenv": "^17.4.2"
   }
 }
+=======
+  "scripts": {
+    "install-all": "npm install && cd backend && npm install && cd ../frontend && npm install",
+    "dev": "npx concurrently \"cd backend && npm run dev\" \"cd frontend && npm run dev\""
+  },
+  "dependencies": {
+    "concurrently": "latest"
+  }
+}
+>>>>>>> ef77c3625e88d9ed7aeabbe0004b7f0bb8c4da77
